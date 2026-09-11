@@ -565,22 +565,519 @@
             } else if (clickedText === '8分台') {
                 showGrade8Selections();
             } else if (clickedText === '10分台' || clickedText === '12分台') {
-                // 其他分台显示默认内容
-                const contentArea = clickedItem.closest('.category-content').querySelector('.content-area');
-                if (contentArea) {
-                    contentArea.innerHTML = '<p style="text-align: center;">该分台暂未开放</p>';
-                }
+                // 10分台显示内容
+                showGrade10Selections();
             } else if (imageData === 'placeholder') {
-                // 占位符，显示默认内容
-                const contentArea = clickedItem.closest('.category-content').querySelector('.content-area');
-                if (contentArea) {
-                    contentArea.innerHTML = '<p>请选择查看详细内容</p>';
+                // 检查是否是妆容进阶或发型进阶
+                const clickedText = clickedItem.textContent.trim();
+                if (clickedText === '妆容进阶') {
+                    showMakeupAdvanced();
+                } else if (clickedText === '发型进阶') {
+                    showHairstyleAdvanced();
+                } else {
+                    // 占位符，显示默认内容
+                    const contentArea = clickedItem.closest('.category-content').querySelector('.content-area');
+                    if (contentArea) {
+                        contentArea.innerHTML = '<p>请选择查看详细内容</p>';
+                    }
+                }
+            }
+        }
+
+        // 显示妆容进阶检查清单
+        function showMakeupAdvanced() {
+            const contentArea = document.querySelector('#makeup .content-area');
+            if (!contentArea) return;
+
+            // 清空内容区域
+            contentArea.innerHTML = '';
+
+            // 创建标题
+            const title = document.createElement('div');
+            title.style.fontWeight = 'bold';
+            title.style.fontSize = '20px';
+            title.style.textAlign = 'center';
+            title.style.color = '#000';
+            title.style.marginBottom = '30px';
+            title.textContent = '妆容进阶 - 检查清单';
+            contentArea.appendChild(title);
+
+            // 创建勾选列表容器
+            const checklistContainer = document.createElement('div');
+            checklistContainer.style.maxWidth = '600px';
+            checklistContainer.style.margin = '0 auto';
+
+            // 妆容进阶项目数据
+            const makeupItems = [
+                {
+                    id: 'makeup-advanced-1',
+                    title: '中轴提亮',
+                    description: '面部中轴线区域提亮，使面部轮廓更清晰'
+                },
+                {
+                    id: 'makeup-advanced-2',
+                    title: '内轮廓平整',
+                    description: '内眼角、鼻梁等区域处理，使面部更立体'
+                },
+                {
+                    id: 'makeup-advanced-3',
+                    title: '合理眉形',
+                    description: '根据脸型设计合适的眉形，修饰脸型比例'
+                },
+                {
+                    id: 'makeup-advanced-4',
+                    title: '三庭五眼对齐',
+                    description: '调整五官位置，达到理想的脸部比例'
+                },
+                {
+                    id: 'makeup-advanced-5',
+                    title: '色彩和谐',
+                    description: '整体妆容色彩搭配和谐，符合个人气质'
+                }
+            ];
+
+            // 创建每个勾选项目
+            makeupItems.forEach(item => {
+                const itemContainer = document.createElement('div');
+                itemContainer.style.marginBottom = '20px';
+                itemContainer.style.padding = '15px';
+                itemContainer.style.border = '1px solid #ddd';
+                itemContainer.style.borderRadius = '8px';
+                itemContainer.style.cursor = 'pointer';
+                itemContainer.style.transition = 'all 0.3s ease';
+
+                // 创建复选框
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = item.id;
+                checkbox.style.marginRight = '10px';
+                checkbox.style.width = '20px';
+                checkbox.style.height = '20px';
+                checkbox.style.cursor = 'pointer';
+
+                // 创建标题和描述
+                const itemContent = document.createElement('div');
+                itemContent.style.display = 'flex';
+                itemContent.style.alignItems = 'flex-start';
+
+                const titleDiv = document.createElement('div');
+                titleDiv.style.fontWeight = 'bold';
+                titleDiv.style.fontSize = '16px';
+                titleDiv.style.marginRight = '10px';
+                titleDiv.textContent = item.title;
+
+                const descDiv = document.createElement('div');
+                descDiv.style.fontSize = '14px';
+                descDiv.style.color = '#666';
+                descDiv.textContent = item.description;
+
+                itemContent.appendChild(titleDiv);
+                itemContent.appendChild(descDiv);
+
+                // 组装项目
+                itemContainer.appendChild(checkbox);
+                itemContainer.appendChild(itemContent);
+
+                // 点击事件
+                itemContainer.addEventListener('click', function(e) {
+                    // 如果点击的是复选框本身，不处理事件（避免重复触发）
+                    if (e.target === checkbox) return;
+
+                    // 切换复选框状态
+                    checkbox.checked = !checkbox.checked;
+
+                    // 触发变更事件
+                    checkbox.dispatchEvent(new Event('change'));
+                });
+
+                // 复选框变更事件
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        // 勾选状态 - 高亮显示
+                        itemContainer.style.backgroundColor = '#fff3cd';
+                        itemContainer.style.border = '2px solid #ffc107';
+                        titleDiv.style.color = '#856404';
+                        descDiv.style.color = '#856404';
+                        titleDiv.style.fontWeight = 'bold';
+
+                        // 保存到localStorage
+                        localStorage.setItem(item.id, 'true');
+                    } else {
+                        // 未勾选状态 - 恢复默认
+                        itemContainer.style.backgroundColor = '#fff';
+                        itemContainer.style.border = '1px solid #ddd';
+                        titleDiv.style.color = '#000';
+                        descDiv.style.color = '#666';
+                        titleDiv.style.fontWeight = 'normal';
+
+                        // 从localStorage删除
+                        localStorage.removeItem(item.id);
+                    }
+
+                    // 更新进度
+                    updateMakeupProgress();
+                });
+
+                // 检查localStorage中的状态
+                const savedState = localStorage.getItem(item.id);
+                if (savedState === 'true') {
+                    checkbox.checked = true;
+                    itemContainer.style.backgroundColor = '#fff3cd';
+                    itemContainer.style.border = '2px solid #ffc107';
+                    titleDiv.style.color = '#856404';
+                    descDiv.style.color = '#856404';
+                    titleDiv.style.fontWeight = 'bold';
+                }
+
+                checklistContainer.appendChild(itemContainer);
+            });
+
+            contentArea.appendChild(checklistContainer);
+
+            // 添加进度显示
+            const progressContainer = document.createElement('div');
+            progressContainer.style.marginTop = '30px';
+            progressContainer.style.textAlign = 'center';
+
+            const progressText = document.createElement('div');
+            progressText.style.marginBottom = '10px';
+            progressText.style.fontWeight = 'bold';
+            progressText.textContent = '进度：0/5';
+            progressContainer.appendChild(progressText);
+
+            const progressBar = document.createElement('div');
+            progressBar.style.width = '100%';
+            progressBar.style.height = '10px';
+            progressBar.style.backgroundColor = '#e0e0e0';
+            progressBar.style.borderRadius = '5px';
+            progressBar.style.overflow = 'hidden';
+            progressBar.style.marginBottom = '20px';
+            progressContainer.appendChild(progressBar);
+
+            const progressFill = document.createElement('div');
+            progressFill.style.height = '100%';
+            progressFill.style.backgroundColor = '#4caf50';
+            progressFill.style.width = '0%';
+            progressFill.style.transition = 'width 0.3s ease';
+            progressBar.appendChild(progressFill);
+
+            // 查看完成按钮
+            const viewCompletedBtn = document.createElement('button');
+            viewCompletedBtn.textContent = '查看已完成项目';
+            viewCompletedBtn.style.padding = '10px 20px';
+            viewCompletedBtn.style.fontSize = '16px';
+            viewCompletedBtn.style.border = '1px solid #000';
+            viewCompletedBtn.style.background = '#fff';
+            viewCompletedBtn.style.cursor = 'pointer';
+            viewCompletedBtn.style.display = 'none';
+            viewCompletedBtn.style.margin = '0 auto';
+
+            viewCompletedBtn.addEventListener('click', function() {
+                // 跳转到10分台
+                const gradeNavItem = document.querySelector('.main-nav li[data-category="grade"]');
+                if (gradeNavItem) {
+                    gradeNavItem.click();
+                    setTimeout(() => {
+                        const gradeSubNav = document.querySelector('#grade .sub-nav li[data-text="10分台"]');
+                        if (gradeSubNav) {
+                            gradeSubNav.click();
+                            setTimeout(() => {
+                                showGrade10Selections();
+                            }, 100);
+                        }
+                    }, 0);
+                }
+            });
+
+            progressContainer.appendChild(viewCompletedBtn);
+            contentArea.appendChild(progressContainer);
+
+            // 初始化进度显示
+            updateMakeupProgress(progressText, progressFill, viewCompletedBtn);
+        }
+
+        // 更新进度显示
+        function updateMakeupProgress(progressText, progressFill, viewCompletedBtn) {
+            const totalItems = 5;
+            const checkboxes = document.querySelectorAll('#makeup .content-area input[type="checkbox"]');
+            const checkedItems = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const progressPercent = (checkedItems / totalItems) * 100;
+
+            if (progressText) {
+                progressText.textContent = `进度：${checkedItems}/${totalItems}`;
+                progressFill.style.width = progressPercent + '%';
+
+                // 更新按钮显示
+                if (checkedItems > 0) {
+                    viewCompletedBtn.style.display = 'inline-block';
+                } else {
+                    viewCompletedBtn.style.display = 'none';
+                }
+            }
+        }
+
+        // 显示发型进阶检查清单
+        function showHairstyleAdvanced() {
+            const contentArea = document.querySelector('#hairstyle .content-area');
+            if (!contentArea) return;
+
+            // 清空内容区域
+            contentArea.innerHTML = '';
+
+            // 创建标题
+            const title = document.createElement('div');
+            title.style.fontWeight = 'bold';
+            title.style.fontSize = '20px';
+            title.style.textAlign = 'center';
+            title.style.color = '#000';
+            title.style.marginBottom = '30px';
+            title.textContent = '发型进阶 - 检查清单';
+            contentArea.appendChild(title);
+
+            // 创建勾选列表容器
+            const checklistContainer = document.createElement('div');
+            checklistContainer.style.maxWidth = '600px';
+            checklistContainer.style.margin = '0 auto';
+
+            // 发型进阶项目数据
+            const hairstyleItems = [
+                {
+                    id: 'hairstyle-advanced-1',
+                    title: '分线',
+                    description: '发缝的设计和走向，影响整体发型轮廓'
+                },
+                {
+                    id: 'hairstyle-advanced-2',
+                    title: '层次',
+                    description: '发型的层次结构，增加发型的立体感和动感'
+                },
+                {
+                    id: 'hairstyle-advanced-3',
+                    title: '卷度',
+                    description: '发型的卷曲程度，塑造不同的风格和气质'
+                },
+                {
+                    id: 'hairstyle-advanced-4',
+                    title: '颜色',
+                    description: '发色的选择和搭配，提升整体造型效果'
+                },
+                {
+                    id: 'hairstyle-advanced-5',
+                    title: '长度',
+                    description: '发型的整体长度，根据脸型和气质选择'
+                },
+                {
+                    id: 'hairstyle-advanced-6',
+                    title: '正面发流',
+                    description: '正面发丝的流向和层次，影响脸型的修饰效果'
+                },
+                {
+                    id: 'hairstyle-advanced-7',
+                    title: '侧面发流',
+                    description: '侧面发丝的走向，增加侧脸的立体感'
+                },
+                {
+                    id: 'hairstyle-advanced-8',
+                    title: '背面发流',
+                    description: '背面发丝的层次和走向，确保整体造型的完整性'
+                }
+            ];
+
+            // 创建每个勾选项目
+            hairstyleItems.forEach(item => {
+                const itemContainer = document.createElement('div');
+                itemContainer.style.marginBottom = '20px';
+                itemContainer.style.padding = '15px';
+                itemContainer.style.border = '1px solid #ddd';
+                itemContainer.style.borderRadius = '8px';
+                itemContainer.style.cursor = 'pointer';
+                itemContainer.style.transition = 'all 0.3s ease';
+                itemContainer.style.display = 'flex';
+                itemContainer.style.alignItems = 'flex-start';
+
+                // 创建复选框
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = item.id;
+                checkbox.style.marginRight = '10px';
+                checkbox.style.marginTop = '2px';
+                checkbox.style.width = '20px';
+                checkbox.style.height = '20px';
+                checkbox.style.cursor = 'pointer';
+                checkbox.style.flexShrink = '0';
+
+                // 创建标题和描述容器
+                const itemContent = document.createElement('div');
+                itemContent.style.flex = '1';
+
+                const titleDiv = document.createElement('div');
+                titleDiv.style.fontWeight = 'bold';
+                titleDiv.style.fontSize = '16px';
+                titleDiv.style.marginBottom = '5px';
+                titleDiv.textContent = item.title;
+
+                const descDiv = document.createElement('div');
+                descDiv.style.fontSize = '14px';
+                descDiv.style.color = '#666';
+                descDiv.textContent = item.description;
+
+                itemContent.appendChild(titleDiv);
+                itemContent.appendChild(descDiv);
+
+                // 组装项目
+                itemContainer.appendChild(checkbox);
+                itemContainer.appendChild(itemContent);
+
+                // 点击事件
+                itemContainer.addEventListener('click', function(e) {
+                    // 如果点击的是复选框本身，不处理事件（避免重复触发）
+                    if (e.target === checkbox) return;
+
+                    // 切换复选框状态
+                    checkbox.checked = !checkbox.checked;
+
+                    // 触发变更事件
+                    checkbox.dispatchEvent(new Event('change'));
+                });
+
+                // 复选框变更事件
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        // 勾选状态 - 高亮显示
+                        itemContainer.style.backgroundColor = '#fff3cd';
+                        itemContainer.style.border = '2px solid #ffc107';
+                        titleDiv.style.color = '#856404';
+                        descDiv.style.color = '#856404';
+                        titleDiv.style.fontWeight = 'bold';
+
+                        // 保存到localStorage
+                        localStorage.setItem(item.id, 'true');
+                    } else {
+                        // 未勾选状态 - 恢复默认
+                        itemContainer.style.backgroundColor = '#fff';
+                        itemContainer.style.border = '1px solid #ddd';
+                        titleDiv.style.color = '#000';
+                        descDiv.style.color = '#666';
+                        titleDiv.style.fontWeight = 'normal';
+
+                        // 从localStorage删除
+                        localStorage.removeItem(item.id);
+                    }
+
+                    // 更新进度
+                    updateHairstyleProgress();
+                });
+
+                // 检查localStorage中的状态
+                const savedState = localStorage.getItem(item.id);
+                if (savedState === 'true') {
+                    checkbox.checked = true;
+                    itemContainer.style.backgroundColor = '#fff3cd';
+                    itemContainer.style.border = '2px solid #ffc107';
+                    titleDiv.style.color = '#856404';
+                    descDiv.style.color = '#856404';
+                    titleDiv.style.fontWeight = 'bold';
+                }
+
+                checklistContainer.appendChild(itemContainer);
+            });
+
+            contentArea.appendChild(checklistContainer);
+
+            // 添加进度显示
+            const progressContainer = document.createElement('div');
+            progressContainer.style.marginTop = '30px';
+            progressContainer.style.textAlign = 'center';
+
+            const progressText = document.createElement('div');
+            progressText.style.marginBottom = '10px';
+            progressText.style.fontWeight = 'bold';
+            progressText.textContent = '进度：0/8';
+            progressContainer.appendChild(progressText);
+
+            const progressBar = document.createElement('div');
+            progressBar.style.width = '100%';
+            progressBar.style.height = '10px';
+            progressBar.style.backgroundColor = '#e0e0e0';
+            progressBar.style.borderRadius = '5px';
+            progressBar.style.overflow = 'hidden';
+            progressBar.style.marginBottom = '20px';
+            progressContainer.appendChild(progressBar);
+
+            const progressFill = document.createElement('div');
+            progressFill.style.height = '100%';
+            progressFill.style.backgroundColor = '#4caf50';
+            progressFill.style.width = '0%';
+            progressFill.style.transition = 'width 0.3s ease';
+            progressBar.appendChild(progressFill);
+
+            // 查看完成按钮
+            const viewCompletedBtn = document.createElement('button');
+            viewCompletedBtn.textContent = '查看已完成项目';
+            viewCompletedBtn.style.padding = '10px 20px';
+            viewCompletedBtn.style.fontSize = '16px';
+            viewCompletedBtn.style.border = '1px solid #000';
+            viewCompletedBtn.style.background = '#fff';
+            viewCompletedBtn.style.cursor = 'pointer';
+            viewCompletedBtn.style.display = 'none';
+            viewCompletedBtn.style.margin = '0 auto';
+
+            viewCompletedBtn.addEventListener('click', function() {
+                // 跳转到10分台
+                const gradeNavItem = document.querySelector('.main-nav li[data-category="grade"]');
+                if (gradeNavItem) {
+                    gradeNavItem.click();
+                    setTimeout(() => {
+                        const gradeSubNav = document.querySelector('#grade .sub-nav li[data-text="10分台"]');
+                        if (gradeSubNav) {
+                            gradeSubNav.click();
+                            setTimeout(() => {
+                                showGrade10Selections();
+                            }, 100);
+                        }
+                    }, 0);
+                }
+            });
+
+            progressContainer.appendChild(viewCompletedBtn);
+            contentArea.appendChild(progressContainer);
+
+            // 初始化进度显示
+            updateHairstyleProgress(progressText, progressFill, viewCompletedBtn);
+        }
+
+        // 更新发型进度显示
+        function updateHairstyleProgress(progressText, progressFill, viewCompletedBtn) {
+            const totalItems = 8;
+            const checkboxes = document.querySelectorAll('#hairstyle .content-area input[type="checkbox"]');
+            const checkedItems = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const progressPercent = (checkedItems / totalItems) * 100;
+
+            if (progressText) {
+                progressText.textContent = `进度：${checkedItems}/${totalItems}`;
+                progressFill.style.width = progressPercent + '%';
+
+                // 更新按钮显示
+                if (checkedItems > 0) {
+                    viewCompletedBtn.style.display = 'inline-block';
+                } else {
+                    viewCompletedBtn.style.display = 'none';
                 }
             }
         }
 
         // 激活第一个子导航
         function activateFirstSubNav(categoryId) {
+            // 对于发型分类，激活第二个子导航（发型产品）而不是第一个
+            if (categoryId === '#hairstyle') {
+                const secondSubNav = document.querySelector(`${categoryId} .sub-nav li:nth-child(2)`);
+                if (secondSubNav) {
+                    secondSubNav.click();
+                    return;
+                }
+            }
+
+            // 其他分类激活第一个子导航
             const firstSubNav = document.querySelector(`${categoryId} .sub-nav li:first-child`);
             if (firstSubNav) {
                 firstSubNav.click();
@@ -940,10 +1437,213 @@
         }
 
         function showFabricAdvanced() {
-            const fabricAdvanced = document.getElementById('fabric-advanced');
-            if (fabricAdvanced) {
-                fabricAdvanced.classList.add('active');
-            }
+            const contentArea = document.querySelector('#fabric .content-area');
+            if (!contentArea) return;
+
+            // 清空内容区域
+            contentArea.innerHTML = '';
+
+            // 创建标题
+            const title = document.createElement('div');
+            title.style.fontWeight = 'bold';
+            title.style.fontSize = '20px';
+            title.style.textAlign = 'center';
+            title.style.color = '#000';
+            title.style.marginBottom = '30px';
+            title.textContent = '面料进阶 - 点选你的搭配';
+            contentArea.appendChild(title);
+
+            // 创建表格容器
+            const tableContainer = document.createElement('div');
+            tableContainer.id = 'fabric-advanced-table';
+            tableContainer.style.width = '100%';
+
+            // 创建表格
+            const table = document.createElement('table');
+            table.id = 'fabricAdvancedTable';
+            table.style.borderCollapse = 'collapse';
+            table.style.width = '100%';
+            table.style.border = '1px solid #ddd';
+            table.style.margin = '20px 0';
+
+            // 创建表头
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+
+            const headers = ['序号', '内搭', '外套', '下装', '鞋子'];
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                th.style.background = '#f2f2f2';
+                th.style.padding = '12px';
+                th.style.textAlign = 'center';
+                th.style.fontWeight = 'bold';
+                th.style.border = '1px solid #ddd';
+                headerRow.appendChild(th);
+            });
+
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // 创建表格数据（从面料表格中提取）
+            const tableData = [
+                { id: 1, inner: '软', outer: '软', bottom: '软', shoes: '软', detail: { inner: '柔软面料', outer: '柔软面料', bottom: '柔软面料', shoes: '柔软面料' } },
+                { id: 2, inner: '软', outer: '软', bottom: '软', shoes: '硬', detail: { inner: '柔软面料', outer: '柔软面料', bottom: '柔软面料', shoes: '硬质面料' } },
+                { id: 3, inner: '软', outer: '软', bottom: '硬', shoes: '软', detail: { inner: '柔软面料', outer: '柔软面料', bottom: '硬质面料', shoes: '柔软面料' } },
+                { id: 4, inner: '软', outer: '软', bottom: '硬', shoes: '硬', detail: { inner: '柔软面料', outer: '柔软面料', bottom: '硬质面料', shoes: '硬质面料' } },
+                { id: 5, inner: '软', outer: '硬', bottom: '软', shoes: '软', detail: { inner: '柔软面料', outer: '硬质面料', bottom: '柔软面料', shoes: '柔软面料' } },
+                { id: 6, inner: '软莱赛尔 50 女人温柔', outer: '硬棉 100 厚', bottom: '软莱赛尔75+锦纶 无褶贴身纱裙后开叉', shoes: '硬长筒皮靴 缎面软鞋', detail: { inner: '软莱赛尔面料，占比50%，体现女性温柔特质', outer: '硬质棉布，占比100%，厚实挺括', bottom: '软莱赛尔75%+锦纶25%，无褶设计，贴身纱裙，后开叉', shoes: '硬质长筒皮靴外层，缎面内衬柔软' } },
+                { id: 7, inner: '软', outer: '硬', bottom: '硬', shoes: '软', detail: { inner: '柔软面料', outer: '硬质面料', bottom: '硬质面料', shoes: '柔软面料' } },
+                { id: 8, inner: '软', outer: '硬', bottom: '硬', shoes: '硬', detail: { inner: '柔软面料', outer: '硬质面料', bottom: '硬质面料', shoes: '硬质面料' } },
+                { id: 9, inner: '硬', outer: '软', bottom: '软', shoes: '软', detail: { inner: '硬质面料', outer: '柔软面料', bottom: '柔软面料', shoes: '柔软面料' } },
+                { id: 10, inner: '硬', outer: '软', bottom: '软', shoes: '硬', detail: { inner: '硬质面料', outer: '柔软面料', bottom: '柔软面料', shoes: '硬质面料' } },
+                { id: 11, inner: '硬', outer: '软', bottom: '硬', shoes: '软', detail: { inner: '硬质面料', outer: '柔软面料', bottom: '硬质面料', shoes: '柔软面料' } },
+                { id: 12, inner: '硬', outer: '软', bottom: '硬', shoes: '硬', detail: { inner: '硬质面料', outer: '柔软面料', bottom: '硬质面料', shoes: '硬质面料' } },
+                { id: 13, inner: '硬', outer: '硬', bottom: '软', shoes: '软', detail: { inner: '硬质面料', outer: '硬质面料', bottom: '柔软面料', shoes: '柔软面料' } },
+                { id: 14, inner: '硬', outer: '硬', bottom: '软', shoes: '硬', detail: { inner: '硬质面料', outer: '硬质面料', bottom: '柔软面料', shoes: '硬质面料' } },
+                { id: 15, inner: '硬', outer: '硬', bottom: '硬', shoes: '软', detail: { inner: '硬质面料', outer: '硬质面料', bottom: '硬质面料', shoes: '柔软面料' } },
+                { id: 16, inner: '硬', outer: '硬', bottom: '硬', shoes: '硬', detail: { inner: '硬质面料', outer: '硬质面料', bottom: '硬质面料', shoes: '硬质面料' } }
+            ];
+
+            // 创建表格主体
+            const tbody = document.createElement('tbody');
+
+            tableData.forEach(rowData => {
+                const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                tr.style.transition = 'background-color 0.2s';
+
+                // 行高亮效果
+                tr.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f9f9f9';
+                });
+
+                tr.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.backgroundColor = '';
+                    }
+                });
+
+                // 序号列
+                const tdId = document.createElement('td');
+                tdId.textContent = rowData.id;
+                tdId.style.padding = '10px';
+                tdId.style.border = '1px solid #ddd';
+                tdId.style.textAlign = 'center';
+                tdId.style.fontWeight = 'bold';
+
+                // 第6行特别样式（第6行是重点推荐）
+                if (rowData.id === 6) {
+                    tdId.style.backgroundColor = '#fff3cd';
+                    tdId.style.color = '#856404';
+                }
+
+                tr.appendChild(tdId);
+
+                // 其他数据列
+                const columns = ['inner', 'outer', 'bottom', 'shoes'];
+                columns.forEach(column => {
+                    const td = document.createElement('td');
+
+                    // 第6行的内容特别显示
+                    if (rowData.id === 6) {
+                        td.textContent = rowData[column];
+                        td.style.backgroundColor = '#fff3cd';
+                        td.style.color = '#856404';
+                        td.style.fontWeight = 'bold';
+                    } else {
+                        td.textContent = rowData[column];
+                    }
+
+                    td.style.padding = '10px';
+                    td.style.border = '1px solid #ddd';
+                    td.style.textAlign = 'center';
+
+                    // 为选中的行添加样式
+                    if (tr.classList.contains('selected')) {
+                        td.style.backgroundColor = '#e8f4fd';
+                    }
+
+                    tr.appendChild(td);
+                });
+
+                // 点击事件
+                tr.addEventListener('click', function() {
+                    // 移除其他行的选中状态
+                    tbody.querySelectorAll('tr').forEach(r => {
+                        r.classList.remove('selected');
+                        r.style.backgroundColor = '';
+                    });
+
+                    // 添加当前行的选中状态
+                    this.classList.add('selected');
+                    this.style.backgroundColor = '#e8f4fd';
+
+                    // 显示确认按钮
+                    confirmBtn.style.display = 'inline-block';
+
+                    // 保存选中数据
+                    selectedRowData = rowData;
+                });
+
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+            tableContainer.appendChild(table);
+            contentArea.appendChild(tableContainer);
+
+            // 添加确认按钮
+            const confirmationArea = document.createElement('div');
+            confirmationArea.style.textAlign = 'center';
+            confirmationArea.style.marginTop = '20px';
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.id = 'fabric-advanced-confirm-btn';
+            confirmBtn.textContent = '确认选择';
+            confirmBtn.style.padding = '10px 20px';
+            confirmBtn.style.fontSize = '16px';
+            confirmBtn.style.border = '1px solid #000';
+            confirmBtn.style.background = '#fff';
+            confirmBtn.style.cursor = 'pointer';
+            confirmBtn.style.display = 'none';
+
+            confirmBtn.addEventListener('click', function() {
+                if (selectedRowData) {
+                    // 保存到localStorage
+                    localStorage.setItem('selectedFabricAdvanced', JSON.stringify({
+                        data: selectedRowData,
+                        timestamp: new Date().getTime()
+                    }));
+
+                    // 更新按钮文本
+                    confirmBtn.textContent = '已保存到十分台';
+                    setTimeout(() => {
+                        confirmBtn.textContent = '确认选择';
+                    }, 2000);
+
+                    // 自动切换到十分台
+                    const gradeNavItem = document.querySelector('.main-nav li[data-category="grade"]');
+                    if (gradeNavItem) {
+                        gradeNavItem.click();
+                        setTimeout(() => {
+                            const gradeSubNav = document.querySelector('#grade .sub-nav li[data-text="10分台"]');
+                            if (gradeSubNav) {
+                                gradeSubNav.click();
+                                setTimeout(() => {
+                                    showGrade10Selections();
+                                }, 100);
+                            }
+                        }, 0);
+                    }
+                }
+            });
+
+            confirmationArea.appendChild(confirmBtn);
+            contentArea.appendChild(confirmationArea);
+
+            // 初始化变量
+            let selectedRowData = null;
         }
 
         // 显示面料软硬卡牌
@@ -1103,10 +1803,196 @@
         }
 
         function showSilhouetteAdvanced() {
-            const silhouetteAdvanced = document.getElementById('silhouette-advanced');
-            if (silhouetteAdvanced) {
-                silhouetteAdvanced.classList.add('active');
-            }
+            const contentArea = document.querySelector('#silhouette .content-area');
+            if (!contentArea) return;
+
+            // 清空内容区域
+            contentArea.innerHTML = '';
+
+            // 创建标题
+            const title = document.createElement('div');
+            title.style.fontWeight = 'bold';
+            title.style.fontSize = '20px';
+            title.style.textAlign = 'center';
+            title.style.color = '#000';
+            title.style.marginBottom = '30px';
+            title.textContent = '版型进阶 - 点选你的搭配';
+            contentArea.appendChild(title);
+
+            // 创建表格容器
+            const tableContainer = document.createElement('div');
+            tableContainer.id = 'silhouette-advanced-table';
+            tableContainer.style.width = '100%';
+
+            // 创建表格
+            const table = document.createElement('table');
+            table.id = 'silhouetteAdvancedTable';
+            table.style.borderCollapse = 'collapse';
+            table.style.width = '100%';
+            table.style.border = '1px solid #ddd';
+            table.style.margin = '20px 0';
+
+            // 创建表头
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+
+            const headers = ['序号', '内搭', '外套', '下装', '鞋子'];
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                th.style.background = '#f2f2f2';
+                th.style.padding = '12px';
+                th.style.textAlign = 'center';
+                th.style.fontWeight = 'bold';
+                th.style.border = '1px solid #ddd';
+                headerRow.appendChild(th);
+            });
+
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // 创建表格数据（从版型表格中提取）
+            const tableData = [
+                { id: 1, inner: '长', outer: '长', bottom: '长', shoes: '长' },
+                { id: 2, inner: '长', outer: '长', bottom: '长', shoes: '短' },
+                { id: 3, inner: '长', outer: '长', bottom: '短', shoes: '长' },
+                { id: 4, inner: '长', outer: '长', bottom: '短', shoes: '短' },
+                { id: 5, inner: '长', outer: '短', bottom: '长', shoes: '长' },
+                { id: 6, inner: '长', outer: '短', bottom: '长', shoes: '短' },
+                { id: 7, inner: '长', outer: '短', bottom: '短', shoes: '长' },
+                { id: 8, inner: '长', outer: '短', bottom: '短', shoes: '短' },
+                { id: 9, inner: '短', outer: '长', bottom: '长', shoes: '长' },
+                { id: 10, inner: '短', outer: '长', bottom: '长', shoes: '短' },
+                { id: 11, inner: '短', outer: '长', bottom: '短', shoes: '长' },
+                { id: 12, inner: '短', outer: '长', bottom: '短', shoes: '短' },
+                { id: 13, inner: '短', outer: '短', bottom: '长', shoes: '长' },
+                { id: 14, inner: '短', outer: '短', bottom: '长', shoes: '短' },
+                { id: 15, inner: '短', outer: '短', bottom: '短', shoes: '长' },
+                { id: 16, inner: '短', outer: '短', bottom: '短', shoes: '短' }
+            ];
+
+            // 创建表格主体
+            const tbody = document.createElement('tbody');
+
+            tableData.forEach(rowData => {
+                const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                tr.style.transition = 'background-color 0.2s';
+
+                // 行高亮效果
+                tr.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f9f9f9';
+                });
+
+                tr.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('selected')) {
+                        this.style.backgroundColor = '';
+                    }
+                });
+
+                // 序号列
+                const tdId = document.createElement('td');
+                tdId.textContent = rowData.id;
+                tdId.style.padding = '10px';
+                tdId.style.border = '1px solid #ddd';
+                tdId.style.textAlign = 'center';
+                tdId.style.fontWeight = 'bold';
+                tr.appendChild(tdId);
+
+                // 其他数据列
+                const columns = ['inner', 'outer', 'bottom', 'shoes'];
+                columns.forEach(column => {
+                    const td = document.createElement('td');
+                    td.textContent = rowData[column];
+                    td.style.padding = '10px';
+                    td.style.border = '1px solid #ddd';
+                    td.style.textAlign = 'center';
+
+                    // 为选中的行添加样式
+                    if (tr.classList.contains('selected')) {
+                        td.style.backgroundColor = '#e8f4fd';
+                    }
+
+                    tr.appendChild(td);
+                });
+
+                // 点击事件
+                tr.addEventListener('click', function() {
+                    // 移除其他行的选中状态
+                    tbody.querySelectorAll('tr').forEach(r => {
+                        r.classList.remove('selected');
+                        r.style.backgroundColor = '';
+                    });
+
+                    // 添加当前行的选中状态
+                    this.classList.add('selected');
+                    this.style.backgroundColor = '#e8f4fd';
+
+                    // 显示确认按钮
+                    confirmBtn.style.display = 'inline-block';
+
+                    // 保存选中数据
+                    selectedRowData = rowData;
+                });
+
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(tbody);
+            tableContainer.appendChild(table);
+            contentArea.appendChild(tableContainer);
+
+            // 添加确认按钮
+            const confirmationArea = document.createElement('div');
+            confirmationArea.style.textAlign = 'center';
+            confirmationArea.style.marginTop = '20px';
+
+            const confirmBtn = document.createElement('button');
+            confirmBtn.id = 'silhouette-advanced-confirm-btn';
+            confirmBtn.textContent = '确认选择';
+            confirmBtn.style.padding = '10px 20px';
+            confirmBtn.style.fontSize = '16px';
+            confirmBtn.style.border = '1px solid #000';
+            confirmBtn.style.background = '#fff';
+            confirmBtn.style.cursor = 'pointer';
+            confirmBtn.style.display = 'none';
+
+            confirmBtn.addEventListener('click', function() {
+                if (selectedRowData) {
+                    // 保存到localStorage
+                    localStorage.setItem('selectedSilhouetteAdvanced', JSON.stringify({
+                        data: selectedRowData,
+                        timestamp: new Date().getTime()
+                    }));
+
+                    // 更新按钮文本
+                    confirmBtn.textContent = '已保存到十分台';
+                    setTimeout(() => {
+                        confirmBtn.textContent = '确认选择';
+                    }, 2000);
+
+                    // 自动切换到十分台
+                    const gradeNavItem = document.querySelector('.main-nav li[data-category="grade"]');
+                    if (gradeNavItem) {
+                        gradeNavItem.click();
+                        setTimeout(() => {
+                            const gradeSubNav = document.querySelector('#grade .sub-nav li[data-text="10分台"]');
+                            if (gradeSubNav) {
+                                gradeSubNav.click();
+                                setTimeout(() => {
+                                    showGrade10Selections();
+                                }, 100);
+                            }
+                        }, 0);
+                    }
+                }
+            });
+
+            confirmationArea.appendChild(confirmBtn);
+            contentArea.appendChild(confirmationArea);
+
+            // 初始化变量
+            let selectedRowData = null;
         }
 
         function showColorAdvanced() {
@@ -1924,6 +2810,397 @@
             }
         }
 
+        // 显示10分台的选中图片
+        function showGrade10Selections() {
+            const contentArea = document.querySelector('#grade .content-area');
+            if (!contentArea) {
+                console.log('找不到 #grade .content-area');
+                return;
+            }
+
+            // 清空内容区域
+            contentArea.innerHTML = '';
+
+            // 标题
+            const mainTitle = document.createElement('div');
+            mainTitle.style.fontWeight = 'bold';
+            mainTitle.style.fontSize = '24px';
+            mainTitle.style.textAlign = 'center';
+            mainTitle.style.color = '#000';
+            mainTitle.style.marginBottom = '30px';
+            mainTitle.textContent = '10分台 - 高级搭配';
+            contentArea.appendChild(mainTitle);
+
+            let hasSelection = false;
+
+            // 检查是否有妆容进阶的完成项目
+            try {
+                const makeupAdvancedItems = [
+                    { id: 'makeup-advanced-1', title: '中轴提亮', description: '面部中轴线区域提亮，使面部轮廓更清晰' },
+                    { id: 'makeup-advanced-2', title: '内轮廓平整', description: '内眼角、鼻梁等区域处理，使面部更立体' },
+                    { id: 'makeup-advanced-3', title: '合理眉形', description: '根据脸型设计合适的眉形，修饰脸型比例' },
+                    { id: 'makeup-advanced-4', title: '三庭五眼对齐', description: '调整五官位置，达到理想的脸部比例' },
+                    { id: 'makeup-advanced-5', title: '色彩和谐', description: '整体妆容色彩搭配和谐，符合个人气质' }
+                ];
+
+                const completedMakeupItems = makeupAdvancedItems.filter(item => localStorage.getItem(item.id) === 'true');
+
+                if (completedMakeupItems.length > 0) {
+                    hasSelection = true;
+
+                    // 妆容进阶标题
+                    const makeupTitle = document.createElement('div');
+                    makeupTitle.style.fontWeight = 'bold';
+                    makeupTitle.style.fontSize = '20px';
+                    makeupTitle.style.textAlign = 'center';
+                    makeupTitle.style.color = '#000';
+                    makeupTitle.style.marginBottom = '20px';
+                    makeupTitle.style.marginTop = '40px';
+                    makeupTitle.textContent = '你的妆容进阶';
+                    contentArea.appendChild(makeupTitle);
+
+                    // 创建完成项目列表
+                    const makeupContainer = document.createElement('div');
+                    makeupContainer.style.maxWidth = '600px';
+                    makeupContainer.style.margin = '0 auto 30px';
+
+                    completedMakeupItems.forEach(item => {
+                        const itemContainer = document.createElement('div');
+                        itemContainer.style.marginBottom = '15px';
+                        itemContainer.style.padding = '15px';
+                        itemContainer.style.backgroundColor = '#fff3cd';
+                        itemContainer.style.border = '2px solid #ffc107';
+                        itemContainer.style.borderRadius = '8px';
+
+                        const titleDiv = document.createElement('div');
+                        titleDiv.style.fontWeight = 'bold';
+                        titleDiv.style.fontSize = '16px';
+                        titleDiv.style.color = '#856404';
+                        titleDiv.style.marginBottom = '5px';
+                        titleDiv.textContent = item.title;
+
+                        const descDiv = document.createElement('div');
+                        descDiv.style.fontSize = '14px';
+                        descDiv.style.color = '#856404';
+                        descDiv.textContent = item.description;
+
+                        itemContainer.appendChild(titleDiv);
+                        itemContainer.appendChild(descDiv);
+                        makeupContainer.appendChild(itemContainer);
+                    });
+
+                    contentArea.appendChild(makeupContainer);
+                }
+            } catch (error) {
+                console.error('读取妆容进阶数据失败:', error);
+            }
+
+            // 检查是否有发型进阶的完成项目
+            try {
+                const hairstyleAdvancedItems = [
+                    { id: 'hairstyle-advanced-1', title: '分线', description: '发缝的设计和走向，影响整体发型轮廓' },
+                    { id: 'hairstyle-advanced-2', title: '层次', description: '发型的层次结构，增加发型的立体感和动感' },
+                    { id: 'hairstyle-advanced-3', title: '卷度', description: '发型的卷曲程度，塑造不同的风格和气质' },
+                    { id: 'hairstyle-advanced-4', title: '颜色', description: '发色的选择和搭配，提升整体造型效果' },
+                    { id: 'hairstyle-advanced-5', title: '长度', description: '发型的整体长度，根据脸型和气质选择' },
+                    { id: 'hairstyle-advanced-6', title: '正面发流', description: '正面发丝的流向和层次，影响脸型的修饰效果' },
+                    { id: 'hairstyle-advanced-7', title: '侧面发流', description: '侧面发丝的走向，增加侧脸的立体感' },
+                    { id: 'hairstyle-advanced-8', title: '背面发流', description: '背面发丝的层次和走向，确保整体造型的完整性' }
+                ];
+
+                const completedHairstyleItems = hairstyleAdvancedItems.filter(item => localStorage.getItem(item.id) === 'true');
+
+                if (completedHairstyleItems.length > 0) {
+                    hasSelection = true;
+
+                    // 发型进阶标题
+                    const hairstyleTitle = document.createElement('div');
+                    hairstyleTitle.style.fontWeight = 'bold';
+                    hairstyleTitle.style.fontSize = '20px';
+                    hairstyleTitle.style.textAlign = 'center';
+                    hairstyleTitle.style.color = '#000';
+                    hairstyleTitle.style.marginBottom = '20px';
+                    hairstyleTitle.style.marginTop = '40px';
+                    hairstyleTitle.textContent = '你的发型进阶';
+                    contentArea.appendChild(hairstyleTitle);
+
+                    // 创建完成项目列表
+                    const hairstyleContainer = document.createElement('div');
+                    hairstyleContainer.style.maxWidth = '600px';
+                    hairstyleContainer.style.margin = '0 auto 30px';
+
+                    completedHairstyleItems.forEach(item => {
+                        const itemContainer = document.createElement('div');
+                        itemContainer.style.marginBottom = '15px';
+                        itemContainer.style.padding = '15px';
+                        itemContainer.style.backgroundColor = '#fff3cd';
+                        itemContainer.style.border = '2px solid #ffc107';
+                        itemContainer.style.borderRadius = '8px';
+
+                        const titleDiv = document.createElement('div');
+                        titleDiv.style.fontWeight = 'bold';
+                        titleDiv.style.fontSize = '16px';
+                        titleDiv.style.color = '#856404';
+                        titleDiv.style.marginBottom = '5px';
+                        titleDiv.textContent = item.title;
+
+                        const descDiv = document.createElement('div');
+                        descDiv.style.fontSize = '14px';
+                        descDiv.style.color = '#856404';
+                        descDiv.textContent = item.description;
+
+                        itemContainer.appendChild(titleDiv);
+                        itemContainer.appendChild(descDiv);
+                        hairstyleContainer.appendChild(itemContainer);
+                    });
+
+                    contentArea.appendChild(hairstyleContainer);
+                }
+            } catch (error) {
+                console.error('读取发型进阶数据失败:', error);
+            }
+
+            // 检查是否有版型进阶的选择
+            try {
+                const silhouetteAdvancedData = localStorage.getItem('selectedSilhouetteAdvanced');
+                if (silhouetteAdvancedData) {
+                    const data = JSON.parse(silhouetteAdvancedData);
+                    if (data && data.data) {
+                        hasSelection = true;
+
+                        // 版型进阶标题
+                        const title = document.createElement('div');
+                        title.style.fontWeight = 'bold';
+                        title.style.fontSize = '20px';
+                        title.style.textAlign = 'center';
+                        title.style.color = '#000';
+                        title.style.marginBottom = '20px';
+                        title.style.marginTop = '40px';
+                        title.textContent = '你的版型进阶';
+                        contentArea.appendChild(title);
+
+                        // 创建表格容器
+                        const tableContainer = document.createElement('div');
+                        tableContainer.style.width = '100%';
+                        tableContainer.style.marginBottom = '30px';
+
+                        // 创建表格
+                        const table = document.createElement('table');
+                        table.style.borderCollapse = 'collapse';
+                        table.style.width = '100%';
+                        table.style.border = '1px solid #ddd';
+                        table.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                        table.style.margin = '0 auto';
+
+                        // 创建表头
+                        const thead = document.createElement('thead');
+                        const headerRow = document.createElement('tr');
+
+                        const headers = ['序号', '内搭', '外套', '下装', '鞋子'];
+                        headers.forEach(headerText => {
+                            const th = document.createElement('th');
+                            th.textContent = headerText;
+                            th.style.background = '#f2f2f2';
+                            th.style.padding = '15px';
+                            th.style.textAlign = 'center';
+                            th.style.fontWeight = 'bold';
+                            th.style.border = '1px solid #ddd';
+                            headerRow.appendChild(th);
+                        });
+
+                        thead.appendChild(headerRow);
+                        table.appendChild(thead);
+
+                        // 创建表格主体
+                        const tbody = document.createElement('tbody');
+
+                        const rowData = data.data;
+                        const tr = document.createElement('tr');
+                        tr.style.backgroundColor = '#e8f4fd';
+
+                        // 序号列
+                        const tdId = document.createElement('td');
+                        tdId.textContent = rowData.id;
+                        tdId.style.padding = '15px';
+                        tdId.style.border = '1px solid #ddd';
+                        tdId.style.textAlign = 'center';
+                        tdId.style.fontWeight = 'bold';
+                        tr.appendChild(tdId);
+
+                        // 其他数据列
+                        const columns = ['inner', 'outer', 'bottom', 'shoes'];
+                        columns.forEach(column => {
+                            const td = document.createElement('td');
+                            td.textContent = rowData[column];
+                            td.style.padding = '15px';
+                            td.style.border = '1px solid #ddd';
+                            td.style.textAlign = 'center';
+                            td.style.fontSize = '18px';
+                            tr.appendChild(td);
+                        });
+
+                        tbody.appendChild(tr);
+                        table.appendChild(tbody);
+
+                        tableContainer.appendChild(table);
+                        contentArea.appendChild(tableContainer);
+
+                        // 添加详细说明
+                        const description = document.createElement('div');
+                        description.style.textAlign = 'center';
+                        description.style.marginTop = '20px';
+                        description.style.padding = '20px';
+                        description.style.backgroundColor = '#f9f9f9';
+                        description.style.borderRadius = '5px';
+                        description.innerHTML = `
+                            <p style="margin-bottom: 10px;"><strong>搭配说明：</strong></p>
+                            <p>内搭：${rowData.id === 1 ? '最长的内搭，营造修长效果' :
+                                rowData.id === 16 ? '最短的内搭，营造活力感' : '适中长度'}</p>
+                            <p>外套：${rowData.outer === '长' ? '长外套，整体修长' : '短外套，显得精神干练'}</p>
+                            <p>下装：${rowData.bottom === '长' ? '长下装，优雅得体' : '短下装，展现腿部线条'}</p>
+                            <p>鞋子：${rowData.shoes === '长' ? '长靴/长款鞋，延伸线条' : '短鞋/鞋跟，突出细节'}</p>
+                        `;
+                        contentArea.appendChild(description);
+                    }
+                }
+            } catch (error) {
+                console.error('读取版型进阶数据失败:', error);
+            }
+
+            // 检查是否有面料进阶的选择
+            try {
+                const fabricAdvancedData = localStorage.getItem('selectedFabricAdvanced');
+                if (fabricAdvancedData) {
+                    const data = JSON.parse(fabricAdvancedData);
+                    if (data && data.data) {
+                        hasSelection = true;
+
+                        // 面料进阶标题
+                        const title = document.createElement('div');
+                        title.style.fontWeight = 'bold';
+                        title.style.fontSize = '20px';
+                        title.style.textAlign = 'center';
+                        title.style.color = '#000';
+                        title.style.marginBottom = '20px';
+                        title.style.marginTop = '40px';
+                        title.textContent = '你的面料进阶';
+                        contentArea.appendChild(title);
+
+                        // 创建表格容器
+                        const tableContainer = document.createElement('div');
+                        tableContainer.style.width = '100%';
+                        tableContainer.style.marginBottom = '30px';
+
+                        // 创建表格
+                        const table = document.createElement('table');
+                        table.style.borderCollapse = 'collapse';
+                        table.style.width = '100%';
+                        table.style.border = '1px solid #ddd';
+                        table.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                        table.style.margin = '0 auto';
+
+                        // 创建表头
+                        const thead = document.createElement('thead');
+                        const headerRow = document.createElement('tr');
+
+                        const headers = ['序号', '内搭', '外套', '下装', '鞋子'];
+                        headers.forEach(headerText => {
+                            const th = document.createElement('th');
+                            th.textContent = headerText;
+                            th.style.background = '#f2f2f2';
+                            th.style.padding = '15px';
+                            th.style.textAlign = 'center';
+                            th.style.fontWeight = 'bold';
+                            th.style.border = '1px solid #ddd';
+                            headerRow.appendChild(th);
+                        });
+
+                        thead.appendChild(headerRow);
+                        table.appendChild(thead);
+
+                        // 创建表格主体
+                        const tbody = document.createElement('tbody');
+
+                        const rowData = data.data;
+                        const tr = document.createElement('tr');
+
+                        // 如果是第6行，使用特殊样式
+                        if (rowData.id === 6) {
+                            tr.style.backgroundColor = '#fff3cd';
+                        } else {
+                            tr.style.backgroundColor = '#e8f4fd';
+                        }
+
+                        // 序号列
+                        const tdId = document.createElement('td');
+                        tdId.textContent = rowData.id;
+                        tdId.style.padding = '15px';
+                        tdId.style.border = '1px solid #ddd';
+                        tdId.style.textAlign = 'center';
+                        tdId.style.fontWeight = 'bold';
+
+                        if (rowData.id === 6) {
+                            tdId.style.backgroundColor = '#fff3cd';
+                            tdId.style.color = '#856404';
+                        }
+
+                        tr.appendChild(tdId);
+
+                        // 其他数据列
+                        const columns = ['inner', 'outer', 'bottom', 'shoes'];
+                        columns.forEach(column => {
+                            const td = document.createElement('td');
+                            td.textContent = rowData[column];
+                            td.style.padding = '15px';
+                            td.style.border = '1px solid #ddd';
+                            td.style.textAlign = 'center';
+                            td.style.fontSize = '18px';
+
+                            if (rowData.id === 6) {
+                                td.style.backgroundColor = '#fff3cd';
+                                td.style.color = '#856404';
+                                td.style.fontWeight = 'bold';
+                            }
+
+                            tr.appendChild(td);
+                        });
+
+                        tbody.appendChild(tr);
+                        table.appendChild(tbody);
+
+                        tableContainer.appendChild(table);
+                        contentArea.appendChild(tableContainer);
+
+                        // 添加详细说明
+                        const description = document.createElement('div');
+                        description.style.textAlign = 'center';
+                        description.style.marginTop = '20px';
+                        description.style.padding = '20px';
+                        description.style.backgroundColor = '#f9f9f9';
+                        description.style.borderRadius = '5px';
+                        description.innerHTML = `
+                            <p style="margin-bottom: 10px;"><strong>面料搭配说明：</strong></p>
+                            ${rowData.id === 6 ? '<p style="color: #856404; font-weight: bold;"><strong>推荐搭配 #6 - 专属定制款</strong></p>' : ''}
+                            <p>软硬平衡：${ rowData.inner.includes('软') && rowData.outer.includes('硬') ? '内搭柔软，外套硬挺，刚柔并济' :
+                                       rowData.inner.includes('软') && rowData.outer.includes('软') ? '全柔软搭配，舒适随性' :
+                                       '全硬挺搭配，干练利落' }</p>
+                            <p>风格特色：${ rowData.id === 6 ? '专业定制面料组合，适合各种场合穿着' :
+                                         rowData.id < 6 ? '柔软搭配，适合日常休闲' : '硬挺搭配，适合正式场合' }</p>
+                            <p>舒适度：${ rowData.shoes === '软' ? '鞋子柔软，全天舒适' : '鞋子硬挺，适合特定场合' }</p>
+                        `;
+                        contentArea.appendChild(description);
+                    }
+                }
+            } catch (error) {
+                console.error('读取面料进阶数据失败:', error);
+            }
+
+            // 如果没有选择任何内容，显示默认提示
+            if (!hasSelection) {
+                contentArea.innerHTML = '<p style="text-align: center;">请先在版型进阶中选择你的搭配</p>';
+            }
+        }
+
         // 为进阶导航添加特殊样式
         const advancedStyle = document.createElement('style');
         advancedStyle.textContent = `
@@ -1936,6 +3213,21 @@
                 right: 0;
                 height: 1px;
                 background-color: #000;
+            }
+
+            #silhouetteAdvancedTable tr.selected,
+            #fabricAdvancedTable tr.selected {
+                background-color: #e8f4fd;
+            }
+
+            #silhouetteAdvancedTable tr:hover,
+            #fabricAdvancedTable tr:hover {
+                background-color: #f9f9f9';
+            }
+
+            #silhouetteAdvancedTable td,
+            #fabricAdvancedTable td {
+                transition: background-color 0.2s;
             }
         `;
         document.head.appendChild(advancedStyle);
